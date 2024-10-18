@@ -69,7 +69,9 @@ def get_branch_files(branch_name):
         return get_pr_files(pr_number)
     else:
         # If no PR exists, we compare with the base branch
-        compare_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/compare/{BASE_BRANCH}...{branch_name}"
+        # compare_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/compare/{BASE_BRANCH}...{branch_name}"
+        compare_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/compare/{BASE_BRANCH}...pull/{PR_NUMBER}/head"
+
         comparison_data = github_api_request(compare_url)
 
         if comparison_data:
@@ -184,6 +186,5 @@ def main():
             print("\nNo conflicting branches found.")
     else:
         print(f"No files found in PR '{PR_NUMBER}'.")
-
 if __name__ == "__main__":
     main()
