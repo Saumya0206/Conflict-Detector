@@ -184,6 +184,7 @@ def main():
                 print(f"\nBranch '{branch}' has modified the following files:")
                 for file in files:
                     print(f"  - {file}")
+
         else:
             print("\nNo conflicting branches found.")
     else:
