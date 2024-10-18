@@ -1,6 +1,7 @@
 import requests
+import os
 
-GITHUB_TOKEN = 'GITHUB_TOKEN'
+GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 REPO_OWNER = 'Saumya0206'
 REPO_NAME = 'VideoCall-and-Chat'
 USERNAME = 'Saumya0206'
