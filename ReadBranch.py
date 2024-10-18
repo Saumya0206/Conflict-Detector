@@ -69,6 +69,7 @@ def get_branch_files(branch_name):
         # If there's a pull request, fetch the files from the PR (whether merged or open)
         pr_number = pr_data['number']
         return get_pr_files(pr_number)
+
     else:
         # If no PR exists, we compare with the base branch
         compare_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/compare/{BASE_BRANCH}...{branch_name}"
