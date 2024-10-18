@@ -174,6 +174,7 @@ def main():
 
         print(f"My PR creation date: {my_pr_date}")
 
+
         # Find conflicting branches with only open PRs and merged PRs after my PR creation date
         conflicting_branches = find_conflicting_branches(base_branch_files, branches, latest_branch, my_pr_date)
 
