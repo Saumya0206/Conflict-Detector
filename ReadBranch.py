@@ -163,8 +163,10 @@ def main():
         print("No branches found.")
         return
 
+
     # Fetch pull request details by PR number
     pr_data = get_pull_request_by_number(PR_NUMBER)
+
     if not pr_data:
         print(f"No PR found for PR number '{PR_NUMBER}'.")
         return
