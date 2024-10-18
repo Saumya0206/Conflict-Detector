@@ -8,7 +8,11 @@ GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 REPO_OWNER = os.getenv('GITHUB_REPOSITORY').split('/')[0]   # Get the owner of the repository
 REPO_NAME = os.getenv('GITHUB_REPOSITORY').split('/')[-1]   # Get the name of the repository
 BASE_BRANCH = 'master'
-PR_NUMBER = os.getenv('GITHUB_REF').split('/')[-1]
+PR_NUMBER = os.getenv('GITHUB_REF').split('/')[-2]
+
+print(f"GITHUB_REPOSITORY: {os.getenv('GITHUB_REPOSITORY')}")
+print(f"GITHUB_REF: {os.getenv('GITHUB_REF')}")
+print(f"PR_NUMBER: {PR_NUMBER}")
 
 # Helper function to make GitHub API requests
 def github_api_request(url):
