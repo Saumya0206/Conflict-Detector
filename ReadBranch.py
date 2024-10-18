@@ -39,17 +39,14 @@ def get_branch_commits(branch_name):
     commits_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/commits?sha={branch_name}&per_page=5"
     return github_api_request(commits_url)
 
-
-# Check if a branch has an open pull request
+# Check if a branch has an open pull request and return its details
 def get_pull_request_for_branch(branch_name):
     pr_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/pulls?state=all&head={REPO_OWNER}:{branch_name}"
     pr_data = github_api_request(pr_url)
 
-    # Return the first pull request if it exists (since a branch can only have one active PR)
     if pr_data and len(pr_data) > 0:
-        return pr_data[0]
+        return pr_data[0]  # Return the first PR (since there can only be one open PR for a branch)
     return None
-
 
 # Get files changed in a pull request
 def get_pr_files(pr_number):
@@ -150,33 +147,37 @@ def find_conflicting_branches(base_branch_files, branches, latest_branch, my_pr_
                 conflicting_branches[branch_name] = common_files
 
     return conflicting_branches
-# Main function to handle branch and conflict analysis
+
 def main():
     branches = get_branches()
     if not branches:
         print("No branches found.")
         return
 
-    latest_branch = f"pull/{PR_NUMBER}/head"
-    base_branch_files = get_branch_files(latest_branch)
+    # Fetch pull request details
+    pr_data = get_pull_request_for_branch(f"pull/{PR_NUMBER}/head")
+    if not pr_data:
+        print(f"No PR found for PR number '{PR_NUMBER}'.")
+        return
+
+    # Extract the actual head branch from the PR details
+    head_branch = pr_data['head']['ref']  # This gives the branch name from which the PR was made
+    print(f"Head branch for PR {PR_NUMBER}: {head_branch}")
+
+    # Use this head branch in the comparison
+    base_branch_files = get_branch_files(head_branch)
 
     if base_branch_files:
-        print(f"Files modified in PR '{PR_NUMBER}':")
+        print(f"Files modified in PR '{PR_NUMBER}' from branch '{head_branch}':")
         for file in base_branch_files:
             print(f"  - {file}")
 
-        # Get the PR creation date for the current branch
-        my_pr_date = get_my_pr_creation_date(latest_branch)
-
-        if not my_pr_date:
-            print(f"No PR found for branch '{latest_branch}'.")
-            return
-
+        # Get the PR creation date
+        my_pr_date = pr_data['created_at']
         print(f"My PR creation date: {my_pr_date}")
 
-
-        # Find conflicting branches with only open PRs and merged PRs after my PR creation date
-        conflicting_branches = find_conflicting_branches(base_branch_files, branches, latest_branch, my_pr_date)
+        # Find conflicting branches
+        conflicting_branches = find_conflicting_branches(base_branch_files, branches, head_branch, my_pr_date)
 
         if conflicting_branches:
             print("\nOther branches working on the same files (potential conflicts):")
