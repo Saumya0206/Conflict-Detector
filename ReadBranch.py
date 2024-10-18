@@ -33,13 +33,43 @@ def get_branch_commits(branch_name):
     return github_api_request(commits_url)
 
 
-# Get files modified between base branch and working branch
-def get_branch_files(branch_name):
-    compare_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/compare/{BASE_BRANCH}...{branch_name}"
-    comparison_data = github_api_request(compare_url)
+# Check if a branch has an open pull request
+def get_pull_request_for_branch(branch_name):
+    pr_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/pulls?state=all&head={REPO_OWNER}:{branch_name}"
+    pr_data = github_api_request(pr_url)
 
-    if comparison_data:
-        return {file_info['filename'] for file_info in comparison_data.get('files', [])}
+    # Return the first pull request if it exists (since a branch can only have one active PR)
+    if pr_data and len(pr_data) > 0:
+        return pr_data[0]
+    return None
+
+
+# Get files changed in a pull request
+def get_pr_files(pr_number):
+    pr_files_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/pulls/{pr_number}/files"
+    pr_files_data = github_api_request(pr_files_url)
+
+    if pr_files_data:
+        return {file_info['filename'] for file_info in pr_files_data}
+    return set()
+
+
+# Get files modified between base branch and working branch, considering merged PRs
+def get_branch_files(branch_name):
+    pr_data = get_pull_request_for_branch(branch_name)
+
+    if pr_data:
+        # If there's a pull request, fetch the files from the PR (whether merged or open)
+        pr_number = pr_data['number']
+        return get_pr_files(pr_number)
+    else:
+        # If no PR exists, we compare with the base branch
+        compare_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/compare/{BASE_BRANCH}...{branch_name}"
+        comparison_data = github_api_request(compare_url)
+
+        if comparison_data:
+            return {file_info['filename'] for file_info in comparison_data.get('files', [])}
+
     return set()
 
 
@@ -70,12 +100,12 @@ def find_conflicting_branches(base_branch_files, branches, latest_branch):
 
     for branch in branches:
         branch_name = branch['name']
-
+        print("branch_name: ", branch_name)
         if branch_name == latest_branch:
             continue
 
         branch_files = get_branch_files(branch_name)
-
+        print("branch_files: ", branch_files)
         if branch_files:
             common_files = base_branch_files.intersection(branch_files)
             if common_files:
