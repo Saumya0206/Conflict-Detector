@@ -4,11 +4,11 @@ from datetime import datetime
 
 # Load GitHub token from environment variable
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
-REPO_OWNER = 'Saumya0206'
-REPO_NAME = 'VideoCall-and-Chat'
-USERNAME = 'Saumya0206'
+# Extract repository owner and name
+REPO_OWNER = os.getenv('GITHUB_REPOSITORY').split('/')[0]   # Get the owner of the repository
+REPO_NAME = os.getenv('GITHUB_REPOSITORY').split('/')[-1]   # Get the name of the repository
 BASE_BRANCH = 'master'
-
+PR_NUMBER = os.getenv('GITHUB_REF').split('/')[-1]
 
 # Helper function to make GitHub API requests
 def github_api_request(url):
@@ -143,7 +143,6 @@ def find_conflicting_branches(base_branch_files, branches, latest_branch, my_pr_
                 conflicting_branches[branch_name] = common_files
 
     return conflicting_branches
-
 # Main function to handle branch and conflict analysis
 def main():
     branches = get_branches()
@@ -151,17 +150,11 @@ def main():
         print("No branches found.")
         return
 
-    latest_branch, commit_time = find_latest_branch(branches)
-
-    if not latest_branch:
-        print("No branches found with your commits.")
-        return
-
-    print(f"The branch you are working on is: {latest_branch} (Last commit time: {commit_time})")
+    latest_branch = f"pull/{PR_NUMBER}/head"
     base_branch_files = get_branch_files(latest_branch)
 
     if base_branch_files:
-        print(f"Files modified in branch '{latest_branch}':")
+        print(f"Files modified in PR '{PR_NUMBER}':")
         for file in base_branch_files:
             print(f"  - {file}")
 
@@ -186,8 +179,7 @@ def main():
         else:
             print("\nNo conflicting branches found.")
     else:
-        print(f"No files found in branch '{latest_branch}'.")
-
+        print(f"No files found in PR '{PR_NUMBER}'.")
 
 if __name__ == "__main__":
     main()
