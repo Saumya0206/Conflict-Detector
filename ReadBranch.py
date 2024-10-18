@@ -1,6 +1,7 @@
 import requests
 import os
 
+# Load GitHub token from environment variable
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 REPO_OWNER = 'Saumya0206'
 REPO_NAME = 'VideoCall-and-Chat'
@@ -8,121 +9,116 @@ USERNAME = 'Saumya0206'
 BASE_BRANCH = 'master'
 
 
-def getConflictingBranches():
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/branches"
+# Helper function to make GitHub API requests
+def github_api_request(url):
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
     response = requests.get(url, headers=headers)
 
     if response.status_code == 200:
         return response.json()
     else:
-        print(f"Failed to fetch branches: {response.status_code}")
+        print(f"Failed to fetch data from {url}: {response.status_code}")
         return None
 
+
+# Get list of branches in the repository
 def get_branches():
     url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/branches"
-    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
-    response = requests.get(url, headers=headers)
+    return github_api_request(url)
 
-    if response.status_code == 200:
-        branches = response.json()
-        for branch in branches:
-            print(branch['name'])
-        latest_branch = None
-        latest_commit_time = None
 
-        for branch in branches:
-            branch_name = branch['name']
-            commits_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/commits?sha={branch_name}&per_page=5"
-            commit_response = requests.get(commits_url, headers=headers)
+# Get the commits for a specific branch
+def get_branch_commits(branch_name):
+    commits_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/commits?sha={branch_name}&per_page=5"
+    return github_api_request(commits_url)
 
-            if commit_response.status_code == 200:
-                commits = commit_response.json()
-                for commit_info in commits:
-                    # Print the full commit info for debugging
-                    # print(f"Commit Info: {commit_info}")
 
-                    # Check if 'author' is not None
-                    if commit_info['author'] is not None:
-                        commit_author_login = commit_info['author']['login']  # GitHub username of the commit author
-                        commit_date = commit_info['commit']['committer']['date']  # Get commit time
-
-                        # Check if the commit author login matches your GitHub username
-                        if commit_author_login == USERNAME:
-                            # Update if this commit is the latest
-                            if latest_commit_time is None or commit_date > latest_commit_time:
-                                latest_commit_time = commit_date
-                                latest_branch = branch_name
-                    else:
-                        print(f"Skipped commit {commit_info['sha']} due to missing author information.")
-            else:
-                print(f"Failed to fetch commits for branch {branch_name}: {commit_response.status_code}")
-
-        return latest_branch, latest_commit_time
-    else:
-        print(f"Failed to fetch branches: {response.status_code}")
-        return None, None
-
+# Get files modified between base branch and working branch
 def get_branch_files(branch_name):
-    # Use the compare API to find the difference between the base branch and the working branch
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/compare/{BASE_BRANCH}...{branch_name}"
-    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
-    response = requests.get(url, headers=headers)
+    compare_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/compare/{BASE_BRANCH}...{branch_name}"
+    comparison_data = github_api_request(compare_url)
 
-    if response.status_code == 200:
-        comparison_data = response.json()
-        files_changed = set()  # Use a set to avoid duplicates
+    if comparison_data:
+        return {file_info['filename'] for file_info in comparison_data.get('files', [])}
+    return set()
 
-        # Loop through the 'files' list to get the filenames
-        for file_info in comparison_data.get('files', []):
-            files_changed.add(file_info['filename'])
 
-        return files_changed
-    else:
-        print(f"Failed to fetch comparison for branch {branch_name}: {response.status_code}")
-        return None
+# Find the latest branch with commits by the user
+def find_latest_branch(branches):
+    latest_branch = None
+    latest_commit_time = None
 
-def find_conflicting_branches(base_branch_files, latest_branch):
-    branches = getConflictingBranches()
+    for branch in branches:
+        branch_name = branch['name']
+        commits = get_branch_commits(branch_name)
+
+        if commits:
+            for commit_info in commits:
+                commit_author = commit_info['author']
+                if commit_author and commit_author['login'] == USERNAME:
+                    commit_date = commit_info['commit']['committer']['date']
+                    if not latest_commit_time or commit_date > latest_commit_time:
+                        latest_commit_time = commit_date
+                        latest_branch = branch_name
+
+    return latest_branch, latest_commit_time
+
+
+# Find branches that have modified common files
+def find_conflicting_branches(base_branch_files, branches, latest_branch):
     conflicting_branches = {}
 
-    if branches:
-        for branch in branches:
-            branch_name = branch['name']
-            print("branch_name: ",branch_name)
-            if branch_name != latest_branch:  # Skip the current branch itself
-                branch_files = get_branch_files(branch_name)
-                print("branch_files: ", branch_files)
-                if branch_files:
-                    # Find common files between base_branch_files and this branch's files
-                    common_files = base_branch_files.intersection(branch_files)
-                    print("common_files: ",common_files)
-                    if common_files:
-                        conflicting_branches[branch_name] = common_files
+    for branch in branches:
+        branch_name = branch['name']
+
+        if branch_name == latest_branch:
+            continue
+
+        branch_files = get_branch_files(branch_name)
+
+        if branch_files:
+            common_files = base_branch_files.intersection(branch_files)
+            if common_files:
+                conflicting_branches[branch_name] = common_files
+
     return conflicting_branches
 
-if __name__ == "__main__":
-    latest_branch, commit_time = get_branches()
-    if latest_branch:
-        print(f"The branch you are working on is: {latest_branch} (Last commit time: {commit_time})")
-        base_branch_files = get_branch_files(latest_branch)
-        if base_branch_files:
-            print(f"Files modified in branch '{latest_branch}':")
-            for file in base_branch_files:
-                print(f"  - {file}")
 
-            # Find which other branches are modifying the same files
-            conflicting_branches = find_conflicting_branches(base_branch_files, latest_branch)
+# Main function to handle branch and conflict analysis
+def main():
+    branches = get_branches()
+    if not branches:
+        print("No branches found.")
+        return
 
-            if conflicting_branches:
-                print("\nOther branches working on the same files (potential conflicts):")
-                for branch, files in conflicting_branches.items():
-                    print(f"\nBranch '{branch}' has modified the following files:")
-                    for file in files:
-                        print(f"  - {file}")
-            else:
-                print("\nNo conflicting branches found.")
-        else:
-            print(f"No files found in branch '{latest_branch}'.")
-    else:
+    latest_branch, commit_time = find_latest_branch(branches)
+
+    if not latest_branch:
         print("No branches found with your commits.")
+        return
+
+    print(f"The branch you are working on is: {latest_branch} (Last commit time: {commit_time})")
+    base_branch_files = get_branch_files(latest_branch)
+
+    if base_branch_files:
+        print(f"Files modified in branch '{latest_branch}':")
+        for file in base_branch_files:
+            print(f"  - {file}")
+
+        # Find conflicting branches
+        conflicting_branches = find_conflicting_branches(base_branch_files, branches, latest_branch)
+
+        if conflicting_branches:
+            print("\nOther branches working on the same files (potential conflicts):")
+            for branch, files in conflicting_branches.items():
+                print(f"\nBranch '{branch}' has modified the following files:")
+                for file in files:
+                    print(f"  - {file}")
+        else:
+            print("\nNo conflicting branches found.")
+    else:
+        print(f"No files found in branch '{latest_branch}'.")
+
+
+if __name__ == "__main__":
+    main()
