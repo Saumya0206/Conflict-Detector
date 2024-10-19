@@ -196,6 +196,7 @@ def main():
                     logging.info(f"  - {file}")
         else:
             logging.info("\nNo conflicting branches found.")
+
     else:
         logging.warning(f"No files found in branch '{latest_branch}'.")
 
