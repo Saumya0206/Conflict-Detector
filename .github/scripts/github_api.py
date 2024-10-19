@@ -2,6 +2,7 @@ import requests
 import logging
 import os
 
+
 # Load environment variables automatically provided by GitHub Actions
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 
