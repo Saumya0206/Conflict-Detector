@@ -12,6 +12,7 @@ if not GITHUB_TOKEN:
     print("GITHUB_TOKEN not found. Exiting.")
     exit(1)
 
+# Helper function to make GitHub API requests
 def github_api_request(url):
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
     response = requests.get(url, headers=headers)
@@ -28,19 +29,23 @@ def get_branches():
     url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/branches"
     return github_api_request(url)
 
+
 # Get the commits for a specific branch
 def get_branch_commits(branch_name):
     commits_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/commits?sha={branch_name}&per_page=5"
     return github_api_request(commits_url)
+
 
 # Check if a branch has an open pull request
 def get_pull_request_for_branch(branch_name):
     pr_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/pulls?state=all&head={REPO_OWNER}:{branch_name}"
     pr_data = github_api_request(pr_url)
 
+    # Return the first pull request if it exists (since a branch can only have one active PR)
     if pr_data and len(pr_data) > 0:
         return pr_data[0]
     return None
+
 
 # Get files changed in a pull request
 def get_pr_files(pr_number):
@@ -49,6 +54,25 @@ def get_pr_files(pr_number):
 
     if pr_files_data:
         return {file_info['filename'] for file_info in pr_files_data}
+    return set()
+
+
+# Get files modified between base branch and working branch, considering merged PRs
+def get_branch_files(branch_name):
+    pr_data = get_pull_request_for_branch(branch_name)
+
+    if pr_data:
+        # If there's a pull request, fetch the files from the PR (whether merged or open)
+        pr_number = pr_data['number']
+        return get_pr_files(pr_number)
+    else:
+        # If no PR exists, we compare with the base branch
+        compare_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/compare/{BASE_BRANCH}...{branch_name}"
+        comparison_data = github_api_request(compare_url)
+
+        if comparison_data:
+            return {file_info['filename'] for file_info in comparison_data.get('files', [])}
+
     return set()
 
 
@@ -73,6 +97,7 @@ def find_latest_branch(branches):
     return latest_branch, latest_commit_time
 
 
+# Get the details of the PR for the current branch
 def get_my_pr_creation_date(branch_name):
     pr_data = get_pull_request_for_branch(branch_name)
 
@@ -97,11 +122,14 @@ def get_merged_prs_after(date_str):
 def find_conflicting_branches(base_branch_files, branches, latest_branch, my_pr_date):
     conflicting_branches = {}
 
+    # Fetch all open PRs
     pr_url_open = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/pulls?state=open"
     open_pr_data = github_api_request(pr_url_open)
 
+    # Fetch merged PRs after my PR date
     merged_prs_after_date = get_merged_prs_after(my_pr_date)
 
+    # Process both open PRs and merged PRs after the specified date
     pr_data_to_check = open_pr_data + merged_prs_after_date
 
     for pr in pr_data_to_check:
@@ -139,6 +167,7 @@ def main():
         for file in base_branch_files:
             print(f"  - {file}")
 
+        # Get the PR creation date for the current branch
         my_pr_date = get_my_pr_creation_date(latest_branch)
 
         if not my_pr_date:
@@ -147,6 +176,7 @@ def main():
 
         print(f"My PR creation date: {my_pr_date}")
 
+        # Find conflicting branches with only open PRs and merged PRs after my PR creation date
         conflicting_branches = find_conflicting_branches(base_branch_files, branches, latest_branch, my_pr_date)
 
         if conflicting_branches:
