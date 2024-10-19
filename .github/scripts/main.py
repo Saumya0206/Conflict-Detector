@@ -25,6 +25,7 @@ def main():
         logging.warning("No branches found.")
         return
 
+
     latest_branch, commit_time = find_latest_branch(repo_owner, repo_name, branches, username)
 
     if not latest_branch:
