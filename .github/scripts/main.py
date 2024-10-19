@@ -12,15 +12,12 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-
-
-# Main function to handle branch and conflict analysis
 def main():
-    repo_owner, repo_name, = os.getenv('GITHUB_REPOSITORY').split("/")
+    repo_owner, repo_name = os.getenv('GITHUB_REPOSITORY').split("/")
     username = os.getenv('GITHUB_ACTOR')
     base_branch = 'master'
 
-    branches = get_branches(repo_owner, repo_name,)
+    branches = get_branches(repo_owner, repo_name)
     if not branches:
         logging.warning("No branches found.")
         return
@@ -39,7 +36,6 @@ def main():
         for file in base_branch_files:
             logging.info(f"  - {file}")
 
-        # Get the PR creation date for the current branch
         my_pr_date = get_my_pr_creation_date(repo_owner, repo_name, latest_branch)
 
         if not my_pr_date:
@@ -48,9 +44,7 @@ def main():
 
         logging.info(f"My PR creation date: {my_pr_date}")
 
-        # Find conflicting branches with only open PRs and merged PRs after my PR creation date
         conflicting_branches = find_conflicting_branches(repo_owner, repo_name, base_branch_files, latest_branch, my_pr_date)
-
 
         if conflicting_branches:
             logging.info("\nOther branches working on the same files (potential conflicts):")
