@@ -34,6 +34,7 @@ def find_latest_branch(repo_owner, repo_name, branches, username):
                         latest_branch = branch_name
 
     return latest_branch, latest_commit_time
+
 # Find conflicting branches considering only open PRs and merged PRs after the specific date
 def find_conflicting_branches(repo_owner, repo_name, base_branch_files, latest_branch, my_pr_date):
     conflicting_branches = {}
