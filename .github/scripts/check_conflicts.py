@@ -23,12 +23,10 @@ def github_api_request(url):
         print(f"Failed to fetch data from {url}: {response.status_code}")
         return None
 
-
 # Get list of branches in the repository
 def get_branches():
     url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/branches"
     return github_api_request(url)
-
 
 # Get the commits for a specific branch
 def get_branch_commits(branch_name):
