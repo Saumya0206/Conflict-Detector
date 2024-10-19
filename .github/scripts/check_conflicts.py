@@ -1,6 +1,5 @@
 import requests
 import os
-from datetime import datetime
 
 # Load environment variables automatically provided by GitHub Actions
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
@@ -11,6 +10,7 @@ BASE_BRANCH = 'master'
 if not GITHUB_TOKEN:
     print("GITHUB_TOKEN not found. Exiting.")
     exit(1)
+
 
 def github_api_request(url):
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
