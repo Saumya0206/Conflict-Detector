@@ -1,5 +1,6 @@
 from github_api import get_pull_request_for_branch, get_pr_files, compare_branches, get_branch_commits, github_api_request
 from utils import get_merged_prs_after
+
 def get_branch_files(repo_owner, repo_name, base_branch, branch_name):
     """
     Get files modified in a specific branch, either via pull request or by comparing with the base branch.
