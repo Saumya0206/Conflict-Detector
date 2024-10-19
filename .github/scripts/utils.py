@@ -10,6 +10,7 @@ def get_my_pr_creation_date(repo_owner, repo_name, branch_name):
         return pr_data['created_at']
     return None
 
+
 def get_merged_prs_after(repo_owner, repo_name, date_str):
     """
     Fetches all merged pull requests that were merged after the specified date.
