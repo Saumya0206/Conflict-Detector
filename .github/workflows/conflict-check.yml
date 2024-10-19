@@ -8,6 +8,7 @@ permissions:
   contents: read  # Ensure GITHUB_TOKEN has access to repository content
   pull-requests: write  # Allow PR access
 
+
 jobs:
   check-conflicts:
     runs-on: ubuntu-latest
