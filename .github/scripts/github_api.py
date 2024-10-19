@@ -9,7 +9,6 @@ if not GITHUB_TOKEN:
     logging.error("GITHUB_TOKEN not found. Exiting.")
     exit(1)
 
-
 def github_api_request(url):
     """
     Makes a GitHub API request using the provided URL and GITHUB_TOKEN for authentication.
@@ -23,7 +22,6 @@ def github_api_request(url):
     else:
         logging.error(f"Failed to fetch data from {url}: {response.status_code}")
         return None
-
 def get_branches(repo_owner, repo_name):
     """
     Fetches all branches in the repository.
