@@ -28,6 +28,7 @@ def get_branches(repo_owner, repo_name):
     url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/branches"
     return github_api_request(url)
 
+
 def get_branch_commits(repo_owner, repo_name, branch_name):
     """
     Fetches commits from a specific branch.
