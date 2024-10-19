@@ -42,6 +42,7 @@ def find_conflicting_branches(repo_owner, repo_name, base_branch_files, branches
     pr_url_open = f"https://api.github.com/repos/{repo_owner}/{repo_name}/pulls?state=open"
     open_pr_data = github_api_request(pr_url_open)
 
+
     # Fetch merged PRs after my PR date
     merged_prs_after_date = get_merged_prs_after(my_pr_date)
 

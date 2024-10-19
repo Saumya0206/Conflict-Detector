@@ -47,6 +47,7 @@ def get_pull_request_for_branch(repo_owner, repo_name, branch_name):
         return pr_data[0]
     return None
 
+
 def get_pr_files(repo_owner, repo_name, pr_number):
     """
     Retrieves files modified in a specific pull request.

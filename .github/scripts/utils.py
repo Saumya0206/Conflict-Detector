@@ -6,6 +6,7 @@ def get_my_pr_creation_date(repo_owner, repo_name, branch_name):
     """
     pr_data = get_pull_request_for_branch(branch_name)
 
+
     if pr_data:
         created_at = pr_data['created_at']
         return created_at
