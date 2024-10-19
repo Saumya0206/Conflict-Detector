@@ -30,7 +30,5 @@ jobs:
         run: |
           . venv/bin/activate
           python .github/scripts/check_conflicts.py
-
         env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Correctly indented 'env' block
