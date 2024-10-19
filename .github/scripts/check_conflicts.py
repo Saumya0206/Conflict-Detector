@@ -1,6 +1,13 @@
 import requests
 import os
-from datetime import datetime
+import logging
+
+# Configure logging settings
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 # Load environment variables automatically provided by GitHub Actions
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
@@ -9,7 +16,7 @@ USERNAME = os.getenv('GITHUB_ACTOR')
 BASE_BRANCH = 'master'
 
 if not GITHUB_TOKEN:
-    print("GITHUB_TOKEN not found. Exiting.")
+    logging.error("GITHUB_TOKEN not found. Exiting.")
     exit(1)
 
 # Helper function to make GitHub API requests
@@ -18,9 +25,10 @@ def github_api_request(url):
     response = requests.get(url, headers=headers)
 
     if response.status_code == 200:
+        logging.debug(f"Successful response from {url}")
         return response.json()
     else:
-        print(f"Failed to fetch data from {url}: {response.status_code}")
+        logging.error(f"Failed to fetch data from {url}: {response.status_code}")
         return None
 
 
@@ -34,7 +42,6 @@ def get_branches():
 def get_branch_commits(branch_name):
     commits_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/commits?sha={branch_name}&per_page=5"
     return github_api_request(commits_url)
-
 
 # Check if a branch has an open pull request
 def get_pull_request_for_branch(branch_name):
@@ -150,45 +157,45 @@ def find_conflicting_branches(base_branch_files, branches, latest_branch, my_pr_
 def main():
     branches = get_branches()
     if not branches:
-        print("No branches found.")
+        logging.warning("No branches found.")
         return
 
     latest_branch, commit_time = find_latest_branch(branches)
 
     if not latest_branch:
-        print("No branches found with your commits.")
+        logging.warning("No branches found with your commits.")
         return
 
-    print(f"The branch you are working on is: {latest_branch} (Last commit time: {commit_time})")
+    logging.info(f"The branch you are working on is: {latest_branch} (Last commit time: {commit_time})")
     base_branch_files = get_branch_files(latest_branch)
 
     if base_branch_files:
-        print(f"Files modified in branch '{latest_branch}':")
+        logging.info(f"Files modified in branch '{latest_branch}':")
         for file in base_branch_files:
-            print(f"  - {file}")
+            logging.info(f"  - {file}")
 
         # Get the PR creation date for the current branch
         my_pr_date = get_my_pr_creation_date(latest_branch)
 
         if not my_pr_date:
-            print(f"No PR found for branch '{latest_branch}'.")
+            logging.warning(f"No PR found for branch '{latest_branch}'.")
             return
 
-        print(f"My PR creation date: {my_pr_date}")
+        logging.info(f"My PR creation date: {my_pr_date}")
 
         # Find conflicting branches with only open PRs and merged PRs after my PR creation date
         conflicting_branches = find_conflicting_branches(base_branch_files, branches, latest_branch, my_pr_date)
 
         if conflicting_branches:
-            print("\nOther branches working on the same files (potential conflicts):")
+            logging.info("\nOther branches working on the same files (potential conflicts):")
             for branch, files in conflicting_branches.items():
-                print(f"\nBranch '{branch}' has modified the following files:")
+                logging.info(f"\nBranch '{branch}' has modified the following files:")
                 for file in files:
-                    print(f"  - {file}")
+                    logging.info(f"  - {file}")
         else:
-            print("\nNo conflicting branches found.")
+            logging.info("\nNo conflicting branches found.")
     else:
-        print(f"No files found in branch '{latest_branch}'.")
+        logging.warning(f"No files found in branch '{latest_branch}'.")
 
 
 if __name__ == "__main__":
