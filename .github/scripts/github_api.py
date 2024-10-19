@@ -9,6 +9,7 @@ if not GITHUB_TOKEN:
     logging.error("GITHUB_TOKEN not found. Exiting.")
     exit(1)
 
+
 # Helper function to make GitHub API requests
 def github_api_request(url):
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}

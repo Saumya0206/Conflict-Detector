@@ -19,6 +19,7 @@ def get_merged_prs_after(repo_owner, repo_name, date_str):
     pr_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/pulls?state=closed"
     pr_data = github_api_request(pr_url)
 
+
     merged_prs = []
     if pr_data:
         for pr in pr_data:
