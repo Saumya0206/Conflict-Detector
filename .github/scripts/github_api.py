@@ -9,10 +9,8 @@ if not GITHUB_TOKEN:
     logging.error("GITHUB_TOKEN not found. Exiting.")
     exit(1)
 
+# Helper function to make GitHub API requests
 def github_api_request(url):
-    """
-    Makes a GitHub API request using the provided URL and GITHUB_TOKEN for authentication.
-    """
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
     response = requests.get(url, headers=headers)
 
@@ -44,6 +42,7 @@ def get_pull_request_for_branch(repo_owner, repo_name, branch_name):
     pr_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/pulls?state=all&head={repo_owner}:{branch_name}"
     pr_data = github_api_request(pr_url)
 
+    # Return the first pull request if it exists (since a branch can only have one active PR)
     if pr_data and len(pr_data) > 0:
         return pr_data[0]
     return None

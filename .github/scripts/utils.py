@@ -4,10 +4,11 @@ def get_my_pr_creation_date(repo_owner, repo_name, branch_name):
     """
     Fetches the creation date of the pull request for the current branch.
     """
-    pr_data = get_pull_request_for_branch(repo_owner, repo_name, branch_name)
+    pr_data = get_pull_request_for_branch(branch_name)
 
     if pr_data:
-        return pr_data['created_at']
+        created_at = pr_data['created_at']
+        return created_at
     return None
 
 def get_merged_prs_after(repo_owner, repo_name, date_str):
