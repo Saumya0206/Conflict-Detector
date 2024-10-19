@@ -26,6 +26,7 @@ def find_latest_branch(repo_owner, repo_name, branches, username):
         commits = get_branch_commits(repo_owner, repo_name, branch_name)
 
         if commits:
+
             for commit_info in commits:
                 commit_author = commit_info['author']
                 if commit_author and commit_author['login'] == username:

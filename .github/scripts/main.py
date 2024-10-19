@@ -20,10 +20,12 @@ def main():
     username = os.getenv('GITHUB_ACTOR')
     base_branch = 'master'
 
+
     branches = get_branches(repo_owner, repo_name,)
     if not branches:
         logging.warning("No branches found.")
         return
+
 
     latest_branch, commit_time = find_latest_branch(repo_owner, repo_name, branches, username)
 
