@@ -8,7 +8,6 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
-
 # Load environment variables automatically provided by GitHub Actions
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 REPO_OWNER, REPO_NAME = os.getenv('GITHUB_REPOSITORY').split("/")
@@ -149,7 +148,9 @@ def find_conflicting_branches(base_branch_files, branches, latest_branch, my_pr_
         if branch_files:
             common_files = base_branch_files.intersection(branch_files)
             if common_files:
-                conflicting_branches[branch_name] = common_files
+                # Determine if the PR is open or merged
+                pr_state = "open" if pr['state'] == "open" else f"merged at {pr['merged_at']}"
+                conflicting_branches[branch_name] = {"files": common_files, "state": pr_state}
 
     return conflicting_branches
 
@@ -188,9 +189,9 @@ def main():
 
         if conflicting_branches:
             logging.info("\nOther branches working on the same files (potential conflicts):")
-            for branch, files in conflicting_branches.items():
-                logging.info(f"\nBranch '{branch}' has modified the following files:")
-                for file in files:
+            for branch, details in conflicting_branches.items():
+                logging.info(f"\nBranch '{branch}' ({details['state']}) has modified the following files:")
+                for file in details["files"]:
                     logging.info(f"  - {file}")
         else:
             logging.info("\nNo conflicting branches found.")
