@@ -1,6 +1,6 @@
 # Branch Conflict Checker 
 
-This repository extends the any project by introducing a **Branch Conflict Checker**. The Branch Conflict Checker is a GitHub Action that automatically checks for potential conflicts between branches when a pull request is created or updated. This helps identify potential file conflicts with open or recently merged pull requests that may modify the same files.
+This repository extends any project by introducing a **Branch Conflict Checker**. The Branch Conflict Checker is a GitHub Action that automatically checks for potential conflicts between branches when a pull request is created or updated. This helps identify potential file conflicts with open or recently merged pull requests that may modify the same files.
 
 ## Problem Statement
 
