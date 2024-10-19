@@ -4,6 +4,7 @@ on:
   pull_request:
     types: [opened, synchronize]
 
+
 permissions:
   contents: read  # Ensure GITHUB_TOKEN has access to repository content
   pull-requests: write  # Allow PR access
