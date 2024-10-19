@@ -8,6 +8,9 @@ REPO_OWNER, REPO_NAME = os.getenv('GITHUB_REPOSITORY').split("/")
 USERNAME = os.getenv('GITHUB_ACTOR')
 BASE_BRANCH = 'master'
 
+if not GITHUB_TOKEN:
+    print("GITHUB_TOKEN not found. Exiting.")
+    exit(1)
 
 def github_api_request(url):
     headers = {"Authorization": f"token {GITHUB_TOKEN}"}
@@ -25,12 +28,10 @@ def get_branches():
     url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/branches"
     return github_api_request(url)
 
-
 # Get the commits for a specific branch
 def get_branch_commits(branch_name):
     commits_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/commits?sha={branch_name}&per_page=5"
     return github_api_request(commits_url)
-
 
 # Check if a branch has an open pull request
 def get_pull_request_for_branch(branch_name):
@@ -40,7 +41,6 @@ def get_pull_request_for_branch(branch_name):
     if pr_data and len(pr_data) > 0:
         return pr_data[0]
     return None
-
 
 # Get files changed in a pull request
 def get_pr_files(pr_number):
