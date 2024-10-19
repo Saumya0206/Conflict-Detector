@@ -12,6 +12,7 @@ def get_branch_files(repo_owner, repo_name, base_branch, branch_name):
     else:
         return compare_branches(repo_owner, repo_name, base_branch, branch_name)
 
+
 def find_latest_branch(branches, commits_fn, username):
     """
     Finds the latest branch with commits by the given user.
