@@ -35,7 +35,6 @@ def get_branch_commits(branch_name):
     commits_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/commits?sha={branch_name}&per_page=5"
     return github_api_request(commits_url)
 
-
 # Check if a branch has an open pull request
 def get_pull_request_for_branch(branch_name):
     pr_url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/pulls?state=all&head={REPO_OWNER}:{branch_name}"
