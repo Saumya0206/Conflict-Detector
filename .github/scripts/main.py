@@ -31,6 +31,7 @@ def main():
     logging.info(f"The branch you are working on is: {latest_branch} (Last commit time: {commit_time})")
     base_branch_files = get_branch_files(repo_owner, repo_name, base_branch, latest_branch)
 
+
     if base_branch_files:
         logging.info(f"Files modified in branch '{latest_branch}':")
         for file in base_branch_files:
