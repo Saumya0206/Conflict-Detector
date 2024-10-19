@@ -12,25 +12,27 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-REPO_OWNER, REPO_NAME = os.getenv('GITHUB_REPOSITORY').split("/")
-USERNAME = os.getenv('GITHUB_ACTOR')
-BASE_BRANCH = 'master'
+
 
 # Main function to handle branch and conflict analysis
 def main():
-    branches = get_branches()
+    repo_owner, repo_name, = os.getenv('GITHUB_REPOSITORY').split("/")
+    username = os.getenv('GITHUB_ACTOR')
+    base_branch = 'master'
+
+    branches = get_branches(repo_owner, repo_name,)
     if not branches:
         logging.warning("No branches found.")
         return
 
-    latest_branch, commit_time = find_latest_branch(branches)
+    latest_branch, commit_time = find_latest_branch(repo_owner, repo_name, branches, username)
 
     if not latest_branch:
         logging.warning("No branches found with your commits.")
         return
 
     logging.info(f"The branch you are working on is: {latest_branch} (Last commit time: {commit_time})")
-    base_branch_files = get_branch_files(latest_branch)
+    base_branch_files = get_branch_files(repo_owner, repo_name, base_branch, latest_branch)
 
     if base_branch_files:
         logging.info(f"Files modified in branch '{latest_branch}':")
@@ -38,7 +40,7 @@ def main():
             logging.info(f"  - {file}")
 
         # Get the PR creation date for the current branch
-        my_pr_date = get_my_pr_creation_date(latest_branch)
+        my_pr_date = get_my_pr_creation_date(repo_owner, repo_name, latest_branch)
 
         if not my_pr_date:
             logging.warning(f"No PR found for branch '{latest_branch}'.")
@@ -47,7 +49,7 @@ def main():
         logging.info(f"My PR creation date: {my_pr_date}")
 
         # Find conflicting branches with only open PRs and merged PRs after my PR creation date
-        conflicting_branches = find_conflicting_branches(base_branch_files, branches, latest_branch, my_pr_date)
+        conflicting_branches = find_conflicting_branches(repo_owner, repo_name, base_branch_files, latest_branch, my_pr_date)
 
 
         if conflicting_branches:

@@ -4,16 +4,16 @@ def get_branch_files(repo_owner, repo_name, base_branch, branch_name):
     """
     Get files modified in a specific branch, either via pull request or by comparing with the base branch.
     """
-    pr_data = get_pull_request_for_branch(branch_name)
+    pr_data = get_pull_request_for_branch(repo_owner, repo_name, branch_name)
 
     if pr_data:
         # If there's a pull request, fetch the files from the PR (whether merged or open)
         pr_number = pr_data['number']
-        return get_pr_files(pr_number)
+        return get_pr_files(repo_owner, repo_name, pr_number)
     else:
         return compare_branches(repo_owner, repo_name, base_branch, branch_name)
 
-def find_latest_branch(branches, username):
+def find_latest_branch(repo_owner, repo_name, branches, username):
     """
     Finds the latest branch with commits by the given user.
     """
@@ -22,7 +22,7 @@ def find_latest_branch(branches, username):
 
     for branch in branches:
         branch_name = branch['name']
-        commits = get_branch_commits(branch_name)
+        commits = get_branch_commits(repo_owner, repo_name, branch_name)
 
         if commits:
             for commit_info in commits:
@@ -35,15 +35,16 @@ def find_latest_branch(branches, username):
 
     return latest_branch, latest_commit_time
 # Find conflicting branches considering only open PRs and merged PRs after the specific date
-def find_conflicting_branches(repo_owner, repo_name, base_branch_files, branches, latest_branch, my_pr_date):
+def find_conflicting_branches(repo_owner, repo_name, base_branch_files, latest_branch, my_pr_date):
     conflicting_branches = {}
 
     # Fetch all open PRs
     pr_url_open = f"https://api.github.com/repos/{repo_owner}/{repo_name}/pulls?state=open"
     open_pr_data = github_api_request(pr_url_open)
 
+
     # Fetch merged PRs after my PR date
-    merged_prs_after_date = get_merged_prs_after(my_pr_date)
+    merged_prs_after_date = get_merged_prs_after(repo_owner, repo_name, my_pr_date)
 
     # Process both open PRs and merged PRs after the specified date
     pr_data_to_check = open_pr_data + merged_prs_after_date
@@ -53,7 +54,7 @@ def find_conflicting_branches(repo_owner, repo_name, base_branch_files, branches
         if branch_name == latest_branch:
             continue
 
-        branch_files = get_pr_files(pr['number'])
+        branch_files = get_pr_files(repo_owner, repo_name, pr['number'])
 
         if branch_files:
             common_files = base_branch_files.intersection(branch_files)
