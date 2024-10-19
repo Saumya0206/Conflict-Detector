@@ -8,7 +8,6 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
-
 # Load environment variables automatically provided by GitHub Actions
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 REPO_OWNER, REPO_NAME = os.getenv('GITHUB_REPOSITORY').split("/")
