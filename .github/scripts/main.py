@@ -1,4 +1,6 @@
 import logging
+import os
+
 from github_api import get_branches, get_branch_commits
 from branch_analysis import get_branch_files, find_latest_branch, find_conflicting_branches
 from utils import get_my_pr_creation_date, get_merged_prs_after
@@ -10,9 +12,9 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-REPO_OWNER, REPO_NAME = 'your_owner', 'your_repo'
+REPO_OWNER, REPO_NAME = os.getenv('GITHUB_REPOSITORY').split("/")
+USERNAME = os.getenv('GITHUB_ACTOR')
 BASE_BRANCH = 'master'
-USERNAME = 'your_username'
 
 def main():
     # Fetch branches
