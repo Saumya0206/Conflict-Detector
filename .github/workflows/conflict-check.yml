@@ -29,6 +29,6 @@ jobs:
       - name: Run Conflict Check Script
         run: |
           . venv/bin/activate
-          python .github/scripts/main.py
+          python scripts/main.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

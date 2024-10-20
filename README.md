@@ -27,11 +27,10 @@ The repository is structured as follows:
 your-repository/
 │
 ├── .github/
-│   ├── workflows/
-│   │   └── conflict-check.yml      # The GitHub Action Workflow definition
-│   └── scripts/
+│   └── workflows/
+│          └── conflict-check.yml   # The GitHub Action Workflow definition                     
+├── scripts/
 │       └── main.py                 # The Python script for checking branch conflicts
-│
 ├── src/
 │   └── ...                         # Your existing codebase (The code you will be working on)
 │
