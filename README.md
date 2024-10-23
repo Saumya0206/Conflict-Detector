@@ -37,5 +37,7 @@ your-repository/
 └── README.md                       # Project's README file
 ```
 
-# Credits
-The idea for this tool was provided by krshrimali. Special thanks for the contribution to this project!
+### Credits
+
+The idea for this tool was provided by [@krshrimali](https://github.com/krshrimali). Special thanks for the contribution to this project!
+
