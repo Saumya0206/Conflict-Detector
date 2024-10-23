@@ -35,3 +35,7 @@ your-repository/
 │   └── ...                         # Your existing codebase (The code you will be working on)
 │
 └── README.md                       # Project's README file
+```
+
+# Credits
+The idea for this tool was provided by krshrimali. Special thanks for the contribution to this project!
